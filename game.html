@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cosmic Memory Mission - Team Stark</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="page-with-game">
+  <div class="utility-buttons" aria-label="Page utility navigation">
+    <a href="index.html" class="utility-btn">Book</a>
+    <a href="about.html" class="utility-btn">About</a>
+    <a href="quiz.html" class="utility-btn">Quiz</a>
+  </div>
+
+  <div class="space-background" aria-hidden="true">
+    <div class="planet planet-1"></div>
+    <div class="planet planet-2"></div>
+    <div class="planet planet-3"></div>
+    <div class="planet planet-4"></div>
+    <div class="planet planet-5"></div>
+    <div class="planet planet-6"></div>
+    <div class="stars"></div>
+  </div>
+
+  <main class="game-wrapper">
+    <header class="game-header">
+      <h1>Cosmic Memory Mission</h1>
+      <p>Flip the cards, make pairs, and complete your space training as quickly as you can.</p>
+    </header>
+
+    <section class="game-controls" aria-label="Mission setup">
+      <label for="difficulty-select">Difficulty</label>
+      <select id="difficulty-select" name="difficulty">
+        <option value="cadet" selected>Cadet &mdash; 4 × 4 grid</option>
+      </select>
+    </section>
+
+    <section class="game-stats" aria-live="polite">
+      <span>Moves: <strong id="move-count">0</strong></span>
+      <span>Matches: <strong id="match-count">0</strong>/<span id="match-total">0</span></span>
+      <span>Time: <strong id="timer">00:00</strong></span>
+      <span>Difficulty: <strong id="difficulty-label">Cadet</strong></span>
+    </section>
+
+    <section class="memory-grid" aria-label="Memory cards" role="grid">
+      <!-- Cards injected via JavaScript -->
+    </section>
+
+    <div class="game-actions">
+      <button type="button" id="restart-game">Restart Mission</button>
+      <a href="https://solarsystem.nasa.gov/kids/" target="_blank" rel="noopener">Explore NASA Kids</a>
+    </div>
+
+    <p class="game-message" id="game-message" aria-live="polite"></p>
+
+    <section class="game-info" aria-labelledby="game-overview-heading">
+      <article>
+        <h2 id="game-overview-heading">Game Overview</h2>
+        <p>"Cosmic Memory" is a space-themed concentration card game designed to complement your "A Tour Through Space" flipbook. The game challenges players to find matching pairs of space-themed cards by testing their memory and observation skills.</p>
+      </article>
+
+      <article>
+        <h2>Educational Value</h2>
+        <ul>
+          <li><strong>Reinforces Learning:</strong> Players encounter the same space concepts featured in the flipbook.</li>
+          <li><strong>Visual Recognition:</strong> Helps children remember astronomical objects and their characteristics.</li>
+          <li><strong>Memory Skills:</strong> Enhances cognitive skills and spatial memory abilities.</li>
+        </ul>
+      </article>
+
+      <article>
+        <h2>User Experience</h2>
+        <p>The game provides a fun, interactive break from reading while reinforcing the educational content of the space flipbook. The cosmic-themed visual design with the same space background as the main site creates a cohesive experience across every section of the website. This game serves as both entertainment and an educational reinforcement tool, making it a perfect addition to the space exploration adventure.</p>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const cardLibrary = [
+      { id: 'sun-frontier', src: 'images/chapter-1/img-1.png', alt: 'The Sun illuminating nearby planets.' },
+      { id: 'mercury-glow', src: 'images/chapter-1/img-2.jpg', alt: 'Mercury glowing against a starry sky.' },
+      { id: 'venus-mist', src: 'images/chapter-1/img-3.png', alt: 'Venus wrapped in dense golden clouds.' },
+      { id: 'earth-home', src: 'images/chapter-1/img-4.jpg', alt: 'Earth and the Moon as seen from space.' },
+      { id: 'mars-dunes', src: 'images/chapter-1/img-5.png', alt: 'Mars with red dunes and craters.' },
+      { id: 'jupiter-storm', src: 'images/chapter-1/img-6.png', alt: 'Jupiter highlighting the Great Red Spot.' },
+      { id: 'saturn-rings', src: 'images/chapter-2/C2P1.png', alt: 'Saturn displaying shining rings.' },
+      { id: 'uranus-horizon', src: 'images/chapter-2/C2P2.png', alt: 'Uranus with a blue-green glow.' },
+      { id: 'neptune-blue', src: 'images/chapter-2/C2P3.png', alt: 'Neptune surrounded by deep blue waves.' },
+      { id: 'pluto-ice', src: 'images/chapter-2/C2P4.png', alt: 'Pluto with icy terrain and stars.' },
+      { id: 'astronaut-adventure', src: 'images/chapter-3/C3P1.png', alt: 'An astronaut floating among stars.' },
+      { id: 'explorer-craft', src: 'images/chapter-3/C3P2.png', alt: 'A spacecraft exploring a galaxy.' }
+    ];
+    const difficultyConfig = {
+      cadet: { pairs: 8, label: 'Cadet' }
+    };
+
+    const memoryGrid = document.querySelector('.memory-grid');
+    const movesDisplay = document.getElementById('move-count');
+    const matchesDisplay = document.getElementById('match-count');
+    const matchTotalDisplay = document.getElementById('match-total');
+    const timerDisplay = document.getElementById('timer');
+    const messageDisplay = document.getElementById('game-message');
+    const restartButton = document.getElementById('restart-game');
+    const difficultySelect = document.getElementById('difficulty-select');
+    const difficultyLabel = document.getElementById('difficulty-label');
+
+    let deck = [];
+    let firstCard = null;
+    let secondCard = null;
+    let lockBoard = false;
+    let moves = 0;
+    let matches = 0;
+    let elapsedSeconds = 0;
+    let timerId = null;
+    let timerRunning = false;
+    let currentDifficulty = difficultySelect.value;
+
+    const shuffle = (array) => {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    };
+
+    const formatTime = (seconds) => {
+      const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+      const secs = (seconds % 60).toString().padStart(2, '0');
+      return `${mins}:${secs}`;
+    };
+
+    const startTimer = () => {
+      if (timerRunning) return;
+      timerRunning = true;
+      timerId = setInterval(() => {
+        elapsedSeconds += 1;
+        timerDisplay.textContent = formatTime(elapsedSeconds);
+      }, 1000);
+    };
+
+    const stopTimer = () => {
+      timerRunning = false;
+      if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+      }
+    };
+
+    const resetSelections = () => {
+      firstCard = null;
+      secondCard = null;
+      lockBoard = false;
+    };
+
+    const createCard = (cardData) => {
+      const card = document.createElement('button');
+      card.className = 'memory-card';
+      card.type = 'button';
+      card.dataset.cardId = cardData.id;
+    card.dataset.cardAlt = cardData.alt;
+      card.setAttribute('aria-pressed', 'false');
+      card.setAttribute('aria-label', 'Hidden space card');
+
+      const inner = document.createElement('span');
+      inner.className = 'card-inner';
+
+      const front = document.createElement('span');
+      front.className = 'card-face card-front';
+      front.innerHTML = '<span>?</span>';
+
+      const back = document.createElement('span');
+      back.className = 'card-face card-back';
+      back.innerHTML = `<img src="${cardData.src}" alt="${cardData.alt}">`;
+
+      inner.append(front, back);
+      card.append(inner);
+
+      card.addEventListener('click', handleCardFlip);
+      return card;
+    };
+
+    const updateMessage = (text) => {
+      messageDisplay.textContent = text;
+    };
+
+    const handleCardFlip = (event) => {
+      const card = event.currentTarget;
+      if (lockBoard || card === firstCard || card.classList.contains('is-matched')) {
+        return;
+      }
+
+      if (!timerRunning) {
+        startTimer();
+        updateMessage('Great launch! Keep searching for the matching pair.');
+      }
+
+      flipCard(card);
+
+      if (!firstCard) {
+        firstCard = card;
+        return;
+      }
+
+      secondCard = card;
+      lockBoard = true;
+      moves += 1;
+      movesDisplay.textContent = moves;
+
+    const isMatch = firstCard.dataset.cardId === secondCard.dataset.cardId;
+      if (isMatch) {
+        setTimeout(handleMatch, 300);
+      } else {
+        setTimeout(unflipSelectedCards, 900);
+      }
+    };
+
+    const flipCard = (card) => {
+      card.classList.add('is-flipped');
+      card.setAttribute('aria-pressed', 'true');
+      const description = card.dataset.cardAlt || 'space scene';
+      card.setAttribute('aria-label', `Revealed card: ${description}`);
+    };
+
+    const handleMatch = () => {
+      if (!firstCard || !secondCard) return;
+
+      firstCard.classList.add('is-matched');
+      secondCard.classList.add('is-matched');
+      firstCard.disabled = true;
+      secondCard.disabled = true;
+      const firstDescription = firstCard.dataset.cardAlt || 'space scene';
+      const secondDescription = secondCard.dataset.cardAlt || 'space scene';
+      firstCard.setAttribute('aria-label', `Matched card: ${firstDescription}`);
+      secondCard.setAttribute('aria-label', `Matched card: ${secondDescription}`);
+
+      matches += 1;
+      matchesDisplay.textContent = matches;
+
+      const targetPairs = getPairTotal(currentDifficulty);
+
+      if (matches === targetPairs) {
+        stopTimer();
+        updateMessage(`Mission accomplished! You found all pairs in ${moves} moves and ${formatTime(elapsedSeconds)}.`);
+      } else {
+        updateMessage(`Stellar! ${matches} of ${targetPairs} pairs secured.`);
+      }
+
+      resetSelections();
+    };
+
+    const unflipSelectedCards = () => {
+      if (firstCard) {
+        firstCard.classList.remove('is-flipped');
+        firstCard.setAttribute('aria-pressed', 'false');
+        firstCard.setAttribute('aria-label', 'Hidden space card');
+      }
+      if (secondCard) {
+        secondCard.classList.remove('is-flipped');
+        secondCard.setAttribute('aria-pressed', 'false');
+        secondCard.setAttribute('aria-label', 'Hidden space card');
+      }
+      updateMessage('Try a different combination.');
+      resetSelections();
+    };
+
+    const getPairTotal = (difficulty) => {
+      const requestedPairs = difficultyConfig[difficulty].pairs;
+      return Math.min(requestedPairs, cardLibrary.length);
+    };
+
+    const getDeckForDifficulty = (difficulty) => {
+      const pairs = getPairTotal(difficulty);
+      const selected = shuffle(cardLibrary).slice(0, pairs);
+      const duplicated = [...selected, ...selected].map((card, index) => ({
+        ...card,
+        uid: `${card.id}-${index}`
+      }));
+      return shuffle(duplicated);
+    };
+
+    const updateDifficultyDisplay = () => {
+      difficultyLabel.textContent = difficultyConfig[currentDifficulty].label;
+      matchTotalDisplay.textContent = getPairTotal(currentDifficulty);
+    };
+
+    const resetBoard = (difficulty = currentDifficulty) => {
+      currentDifficulty = difficulty;
+      difficultySelect.value = currentDifficulty;
+      updateDifficultyDisplay();
+      stopTimer();
+      resetSelections();
+      deck = getDeckForDifficulty(currentDifficulty);
+      memoryGrid.innerHTML = '';
+      deck.forEach((cardData) => {
+        const card = createCard(cardData);
+        memoryGrid.append(card);
+      });
+
+      moves = 0;
+      matches = 0;
+      elapsedSeconds = 0;
+      movesDisplay.textContent = moves;
+      matchesDisplay.textContent = matches;
+      timerDisplay.textContent = '00:00';
+      updateMessage('Flip any card to launch your mission.');
+    };
+
+    restartButton.addEventListener('click', () => resetBoard(currentDifficulty));
+    difficultySelect.addEventListener('change', (event) => {
+      resetBoard(event.target.value);
+      updateMessage('New mission parameters set. Begin when ready!');
+    });
+
+    resetBoard(currentDifficulty);
+  </script>
+</body>
+
+</html>
