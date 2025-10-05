@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz - Journey Through Space Weather</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 40px 20px 80px;
+      background: #0a0e27;
+      position: relative;
+      overflow-x: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .space-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse at top, rgba(88, 70, 180, 0.15) 0%, transparent 50%),
+                  radial-gradient(ellipse at bottom right, rgba(72, 180, 200, 0.1) 0%, transparent 50%),
+                  #0a0e27;
+    }
+
+    .planet {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(40px);
+      opacity: 0.6;
+    }
+
+    .planet-1 {
+      top: -120px;
+      left: -100px;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(147, 112, 219, 0.4) 0%, rgba(147, 112, 219, 0.1) 70%, transparent 100%);
+      animation: glow-pulse 8s ease-in-out infinite;
+    }
+
+    .planet-2 {
+      top: 40px;
+      right: -70px;
+      width: 260px;
+      height: 260px;
+      background: radial-gradient(circle, rgba(72, 209, 204, 0.4) 0%, rgba(72, 209, 204, 0.1) 70%, transparent 100%);
+      animation: glow-pulse 10s ease-in-out infinite 2s;
+    }
+
+    .planet-3 {
+      bottom: -120px;
+      left: 60px;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle, rgba(138, 43, 226, 0.35) 0%, rgba(138, 43, 226, 0.1) 70%, transparent 100%);
+      animation: glow-pulse 12s ease-in-out infinite 4s;
+    }
+
+    .planet-4 {
+      bottom: 120px;
+      right: -100px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(65, 105, 225, 0.3) 0%, rgba(65, 105, 225, 0.1) 70%, transparent 100%);
+      animation: glow-pulse 9s ease-in-out infinite 1s;
+    }
+
+    @keyframes glow-pulse {
+      0%, 100% {
+        opacity: 0.6;
+        filter: blur(40px);
+      }
+      50% {
+        opacity: 0.8;
+        filter: blur(60px);
+      }
+    }
+
+    .stars {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image:
+        radial-gradient(2px 2px at 20% 30%, white, transparent),
+        radial-gradient(2px 2px at 60% 70%, white, transparent),
+        radial-gradient(1px 1px at 50% 50%, white, transparent),
+        radial-gradient(1px 1px at 80% 10%, white, transparent),
+        radial-gradient(2px 2px at 90% 60%, white, transparent);
+      background-size: 200% 200%;
+      opacity: 0.35;
+      animation: twinkle 4s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.6; }
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      max-width: 960px;
+      width: 100%;
+    }
+
+    .top-actions {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .nav-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: rgba(147, 112, 219, 0.15);
+      border: 1px solid rgba(147, 112, 219, 0.3);
+      border-radius: 12px;
+      color: #e0e7ff;
+      text-decoration: none;
+      font-weight: 500;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .nav-button:hover {
+      background: rgba(147, 112, 219, 0.25);
+      border-color: rgba(147, 112, 219, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .quiz-wrapper {
+      background: rgba(15, 20, 45, 0.65);
+      border: 1px solid rgba(147, 112, 219, 0.25);
+      border-radius: 24px;
+      padding: 48px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    }
+
+    h1 {
+      font-size: 44px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #9370db, #48d1cc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    p {
+      font-size: 18px;
+      line-height: 1.8;
+      color: rgba(224, 231, 255, 0.9);
+    }
+
+    .intro {
+      margin-bottom: 32px;
+    }
+
+    .quiz-section {
+      margin-bottom: 36px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #48d1cc;
+      margin-bottom: 20px;
+    }
+
+    .quiz-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .quiz-grid.true-false {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .quiz-item {
+      background: rgba(147, 112, 219, 0.1);
+      border: 1px solid rgba(147, 112, 219, 0.2);
+      border-radius: 18px;
+      padding: 24px;
+    }
+
+    .quiz-item strong {
+      color: #e0e7ff;
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #e0e7ff;
+      margin-bottom: 12px;
+    }
+
+    .quiz-item h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #e0e7ff;
+      margin-bottom: 12px;
+    }
+
+    ul,
+    ol {
+      margin: 12px 0 16px 22px;
+      color: rgba(224, 231, 255, 0.9);
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    details {
+      margin-top: 12px;
+      background: rgba(10, 14, 39, 0.65);
+      border-radius: 12px;
+      border: 1px solid rgba(72, 209, 204, 0.25);
+      padding: 12px 16px;
+      color: rgba(224, 231, 255, 0.9);
+    }
+
+    details summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: #48d1cc;
+      outline: none;
+    }
+
+    details[open] summary {
+      margin-bottom: 8px;
+    }
+
+    .highlight {
+      color: #48d1cc;
+      font-weight: 600;
+    }
+
+    .footer-note {
+      margin-top: 32px;
+      font-size: 16px;
+      color: rgba(224, 231, 255, 0.75);
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 32px 16px 64px;
+      }
+
+      .quiz-wrapper {
+        padding: 32px 24px;
+      }
+
+      h1 {
+        font-size: 32px;
+      }
+
+      .quiz-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="space-background">
+    <div class="planet planet-1"></div>
+    <div class="planet planet-2"></div>
+    <div class="planet planet-3"></div>
+    <div class="planet planet-4"></div>
+    <div class="stars"></div>
+  </div>
+
+  <div class="container">
+    <div class="top-actions">
+      <a href="index.html" class="nav-button">← Back to Book</a>
+    </div>
+
+    <div class="quiz-wrapper">
+      <h1>Space Weather Quiz</h1>
+      <p class="intro">
+        Ready for launch? Answer these quick questions to see how much you remember from <span class="highlight">Journey Through
+        Space Weather</span>. Check the answers to learn even more!
+      </p>
+
+      <div class="quiz-section">
+        <h2 class="section-title">Multiple Choice</h2>
+        <div class="quiz-grid">
+          <div class="quiz-item">
+            <h3>1. What is a solar flare?</h3>
+            <ol type="a">
+              <li>A bright explosion of energy from the Sun</li>
+              <li>A storm on Earth</li>
+              <li>A type of satellite</li>
+              <li>A comet passing by Earth</li>
+            </ol>
+            <details>
+              <summary>Show Answer</summary>
+              <p><strong>Answer:</strong> a) A bright explosion of energy from the Sun</p>
+            </details>
+          </div>
+
+          <div class="quiz-item">
+            <h3>2. What does CME stand for?</h3>
+            <ol type="a">
+              <li>Cosmic Magnetic Energy</li>
+              <li>Coronal Mass Ejection</li>
+              <li>Celestial Motion Event</li>
+              <li>Comet Meteor Explosion</li>
+            </ol>
+            <details>
+              <summary>Show Answer</summary>
+              <p><strong>Answer:</strong> b) Coronal Mass Ejection</p>
+            </details>
+          </div>
+
+          <div class="quiz-item">
+            <h3>3. What can happen to satellites when a solar storm reaches Earth?</h3>
+            <ol type="a">
+              <li>They glow with auroras</li>
+              <li>They can get pushed out of orbit or disrupted</li>
+              <li>They explode automatically</li>
+              <li>Nothing happens</li>
+            </ol>
+            <details>
+              <summary>Show Answer</summary>
+              <p><strong>Answer:</strong> b) They can get pushed out of orbit or disrupted</p>
+            </details>
+          </div>
+
+          <div class="quiz-item">
+            <h3>4. Which of these can be caused by space weather?</h3>
+            <ol type="a">
+              <li>Auroras in the sky</li>
+              <li>GPS signal disruptions</li>
+              <li>Power outages</li>
+              <li>All of the above</li>
+            </ol>
+            <details>
+              <summary>Show Answer</summary>
+              <p><strong>Answer:</strong> d) All of the above</p>
+            </details>
+          </div>
+
+          <div class="quiz-item">
+            <h3>5. Who watches the Sun and solar storms to protect Earth?</h3>
+            <ol type="a">
+              <li>Pilots</li>
+              <li>Farmers</li>
+              <li>Scientists and satellites</li>
+              <li>Firefighters</li>
+            </ol>
+            <details>
+              <summary>Show Answer</summary>
+              <p><strong>Answer:</strong> c) Scientists and satellites</p>
+            </details>
+          </div>
+
+          <div class="quiz-item">
+            <h3>6. What does Flara, the solar flare, usually create when she reaches Earth?</h3>
+            <ol type="a">
+              <li>Earthquakes</li>
+              <li>Auroras and energy that can affect satellites and radios</li>
+              <li>Tornadoes</li>
+              <li>Floods</li>
+            </ol>
+            <details>
+              <summary>Show Answer</summary>
+              <p><strong>Answer:</strong> b) Auroras and energy that can affect satellites and radios</p>
+            </details>
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz-section">
+        <h2 class="section-title">True or False</h2>
+        <div class="quiz-grid true-false">
+          <div class="quiz-item">
+            <h3>7. Solar flares travel slower than CMEs.</h3>
+            <details>
+              <summary>Show Answer</summary>
+              <p><strong>Answer:</strong> False</p>
+            </details>
+          </div>
+
+          <div class="quiz-item">
+            <h3>8. Space weather only affects astronauts in space.</h3>
+            <details>
+              <summary>Show Answer</summary>
+              <p><strong>Answer:</strong> False</p>
+            </details>
+          </div>
+
+          <div class="quiz-item">
+            <h3>9. Auroras are caused when particles from the Sun interact with Earth’s atmosphere.</h3>
+            <details>
+              <summary>Show Answer</summary>
+              <p><strong>Answer:</strong> True</p>
+            </details>
+          </div>
+
+          <div class="quiz-item">
+            <h3>10. Power grids and satellites need to prepare when big CMEs are approaching Earth.</h3>
+            <details>
+              <summary>Show Answer</summary>
+              <p><strong>Answer:</strong> True</p>
+            </details>
+          </div>
+
+          <div class="quiz-item">
+            <h3>11. Humans can see space weather effects like auroras even in tropical regions sometimes.</h3>
+            <details>
+              <summary>Show Answer</summary>
+              <p><strong>Answer:</strong> True (rarely, during very strong solar storms)</p>
+            </details>
+          </div>
+
+          <div class="quiz-item">
+            <h3>12. Flare and CME characters in the story help scientists learn more about the Sun and space weather.</h3>
+            <details>
+              <summary>Show Answer</summary>
+              <p><strong>Answer:</strong> True</p>
+            </details>
+          </div>
+        </div>
+      </div>
+
+      <p class="footer-note">Great job! Keep exploring the cosmos and see what other wonders you can discover.</p>
+    </div>
+  </div>
+</body>
+
+</html>
